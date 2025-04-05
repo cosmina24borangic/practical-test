@@ -6,7 +6,7 @@
 
 model Product {
   id          Int      @id @default(autoincrement())
-  name        String
+  name        String   @db.VarChar(50)
   price       Float
   description String
   category    Category @relation(fields: [categoryId], references: [id])
@@ -18,7 +18,7 @@ model Product {
 
 model Category {
   id       Int        @id @default(autoincrement())
-  name     String
+  name     String     @db.VarChar(50)
   parent   Category?  @relation("CategoryParent", fields: [parentId], references: [id])
   parentId Int?
   products Product[]
@@ -27,7 +27,7 @@ model Category {
 
 model Tag {
   id       Int       @id @default(autoincrement())
-  name     String
+  name     String    @db.VarChar(50)
   products Product[] @relation("ProductTags")
 }
 

@@ -53,9 +53,68 @@ export async function updateProduct(id: number, data: {
       categoryId: data.categoryId,
       tags: data.tagIds
         ? {
-            set: data.tagIds.map((id) => ({ id })),
-          }
+          set: data.tagIds.map((id) => ({ id })),
+        }
         : undefined,
+    },
+  });
+}
+
+export async function getFilteredProducts({
+  categoryId,
+  tagIds,
+  minPrice,
+  maxPrice,
+  search,
+  sortBy,
+  sortOrder,
+}: {
+  categoryId?: number;
+  tagIds?: number[];
+  minPrice?: number;
+  maxPrice?: number;
+  search?: string;
+  sortBy?: 'name' | 'price' | 'createdAt';
+  sortOrder?: 'asc' | 'desc';
+}) {
+  const filters: any = {};
+
+  if (categoryId) {
+    filters.categoryId = categoryId;
+  }
+
+  if (tagIds?.length) {
+    filters.tags = {
+      some: {
+        id: {
+          in: tagIds,
+        },
+      },
+    };
+  }
+
+  if (minPrice !== undefined || maxPrice !== undefined) {
+    filters.price = {};
+    if (minPrice !== undefined) filters.price.gte = minPrice;
+    if (maxPrice !== undefined) filters.price.lte = maxPrice;
+  }
+
+  if (search) {
+    filters.name = {
+      contains: search,
+    };
+  }
+
+  return await prisma.product.findMany({
+    where: filters,
+    orderBy: sortBy
+      ? {
+        [sortBy]: sortOrder || 'asc',
+      }
+      : undefined,
+    include: {
+      category: true,
+      tags: true,
     },
   });
 }
