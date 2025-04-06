@@ -53,11 +53,22 @@ export async function updateProduct(id: number, data: {
       categoryId: data.categoryId,
       tags: data.tagIds
         ? {
-          set: data.tagIds.map((id) => ({ id })),
-        }
+            set: data.tagIds.map((id) => ({ id })),
+          }
         : undefined,
     },
   });
+}
+
+async function getAllCategoryIds(categoryId: number): Promise<number[]> {
+  const categories = await prisma.category.findMany();
+
+  const collectIds = (id: number): number[] => {
+    const children = categories.filter(cat => cat.parentId === id);
+    return [id, ...children.flatMap(child => collectIds(child.id))];
+  };
+
+  return collectIds(categoryId);
 }
 
 export async function getFilteredProducts({
@@ -80,7 +91,8 @@ export async function getFilteredProducts({
   const filters: any = {};
 
   if (categoryId) {
-    filters.categoryId = categoryId;
+    const categoryIds = await getAllCategoryIds(categoryId);
+    filters.categoryId = { in: categoryIds };
   }
 
   if (tagIds?.length) {
@@ -109,8 +121,8 @@ export async function getFilteredProducts({
     where: filters,
     orderBy: sortBy
       ? {
-        [sortBy]: sortOrder || 'asc',
-      }
+          [sortBy]: sortOrder || 'asc',
+        }
       : undefined,
     include: {
       category: true,

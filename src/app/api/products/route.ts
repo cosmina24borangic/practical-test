@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getFilteredProducts } from '@/lib/actions/product';
+import { createProduct } from '@/lib/actions/product';
 
 export async function GET(req: Request) {
 
@@ -25,3 +26,24 @@ export async function GET(req: Request) {
 
     return NextResponse.json(products);
 }
+
+export async function POST(req: Request) {
+
+    const body = await req.json();
+    const { name, price, description, categoryId, tagIds } = body;
+  
+    if (!name || !price || !description || !categoryId) {
+
+      return NextResponse.json({ error: 'Lipsesc câmpuri obligatorii' }, { status: 400 });
+    }
+  
+    const newProduct = await createProduct({
+      name,
+      price,
+      description,
+      categoryId,
+      tagIds,
+    });
+  
+    return NextResponse.json(newProduct);
+  }
