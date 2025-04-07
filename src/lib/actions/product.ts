@@ -53,8 +53,8 @@ export async function updateProduct(id: number, data: {
       categoryId: data.categoryId,
       tags: data.tagIds
         ? {
-            set: data.tagIds.map((id) => ({ id })),
-          }
+          set: data.tagIds.map((id) => ({ id })),
+        }
         : undefined,
     },
   });
@@ -85,7 +85,7 @@ export async function getFilteredProducts({
   minPrice?: number;
   maxPrice?: number;
   search?: string;
-  sortBy?: 'name' | 'price' | 'createdAt';
+  sortBy?: 'name' | 'price';
   sortOrder?: 'asc' | 'desc';
 }) {
   const filters: any = {};
@@ -117,12 +117,15 @@ export async function getFilteredProducts({
     };
   }
 
+  const allowedSortFields = ['name', 'price'];
+  const sortKey = allowedSortFields.includes(sortBy || '') ? sortBy : undefined;
+
   return await prisma.product.findMany({
     where: filters,
-    orderBy: sortBy
+    orderBy: sortKey
       ? {
-          [sortBy]: sortOrder || 'asc',
-        }
+        [sortKey]: sortOrder || 'asc',
+      }
       : undefined,
     include: {
       category: true,

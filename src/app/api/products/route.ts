@@ -3,7 +3,6 @@ import { getFilteredProducts } from '@/lib/actions/product';
 import { createProduct } from '@/lib/actions/product';
 
 export async function GET(req: Request) {
-
     const { searchParams } = new URL(req.url);
 
     const categoryId = searchParams.get('categoryId');
@@ -11,7 +10,7 @@ export async function GET(req: Request) {
     const minPrice = searchParams.get('minPrice');
     const maxPrice = searchParams.get('maxPrice');
     const search = searchParams.get('search');
-    const sortBy = searchParams.get('sortBy') as 'name' | 'price' | 'createdAt';
+    const sortBy = searchParams.get('sortBy') as 'name' | 'price';
     const sortOrder = searchParams.get('sortOrder') as 'asc' | 'desc';
 
     const products = await getFilteredProducts({
@@ -28,22 +27,20 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-
     const body = await req.json();
     const { name, price, description, categoryId, tagIds } = body;
   
     if (!name || !price || !description || !categoryId) {
-
-      return NextResponse.json({ error: 'Lipsesc câmpuri obligatorii' }, { status: 400 });
+        return NextResponse.json({ error: 'Lipsesc câmpuri obligatorii' }, { status: 400 });
     }
   
     const newProduct = await createProduct({
-      name,
-      price,
-      description,
-      categoryId,
-      tagIds,
+        name,
+        price,
+        description,
+        categoryId,
+        tagIds,
     });
   
     return NextResponse.json(newProduct);
-  }
+}
